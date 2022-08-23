@@ -14,7 +14,7 @@ import { renderComponentNode  } from "@/src/reconciler/mount";
 import { addEffect } from "@/src/reconciler/commit";
 import {
     appendChild, replaceChild, 
-    updateTextnstance
+    updateInstance, updateTextnstance
 } from "@/src/renderer/HostConfig";
 /**
  * ==========================================
@@ -124,6 +124,10 @@ function reconcilerHostComponentNode(
     }
     workInProgress.stateNode = current.stateNode;
     workInProgress.renderedChildren = nextChildrenElement.map(child => createComponentNodeFromElementNode(child));
+    addEffect(() => {
+        const nextProps = workInProgress.element.props;
+        updateInstance(workInProgress.stateNode as Element, nextProps);
+    })
     paths.push(workInProgress);
     for(let i = 0 ; i < workInProgress.renderedChildren.length ; ++i) {
         const nextChildComponentNode = workInProgress.renderedChildren[i];
@@ -177,6 +181,7 @@ function reconcilerCustomComponentNode(
     // method or function. then cintinue recursivly call.
     const preElementType = current.element.type;
     const nextElementType = workInProgress.element.type;
+    // element type is different.
     if(preElementType !== nextElementType) {
         renderComponentNode(workInProgress);
         const shaowCopyPaths = [...paths];
@@ -189,17 +194,23 @@ function reconcilerCustomComponentNode(
         });
         return workInProgress;
     }
+    // element type is same.
+    const nextProps = workInProgress.element.props;
     workInProgress.stateNode = current.stateNode;
     let nextChildrenElement: ElementNode | null = null;
     if((workInProgress.element.type as ClassComponentType).isVirtualDOMComponent) {
         const instance = workInProgress.stateNode as BaseComponent;
+        instance.props = nextProps;
         nextChildrenElement = instance.render();
     }else {
         const func = workInProgress.element.type as FunctionComponentType;
-        const props = workInProgress.element.props;
-       nextChildrenElement = func(props);
+        nextChildrenElement = func(nextProps);
     }
-    workInProgress.renderedChildren = createComponentNodeFromElementNode(nextChildrenElement as ElementNode);
+    if(nextChildrenElement === null) {
+        workInProgress.renderedChildren  = null;
+        return workInProgress;
+    }
+    workInProgress.renderedChildren = createComponentNodeFromElementNode(nextChildrenElement);
     paths.push(workInProgress);
     reconcilerComponentNode(
         current.renderedChildren,

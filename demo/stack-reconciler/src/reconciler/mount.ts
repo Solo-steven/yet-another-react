@@ -2,6 +2,7 @@ import {
     BaseComponent,
     ElementNode, ComponentElementNode, LiteralElementNode,
     FunctionComponentType,
+    ClassComponentType,
 } from "@/src/reconciler/shared/Element";
 import { 
     ComponentNode,
@@ -71,8 +72,8 @@ function renderCustomComponentNode(
     // Mount instance to stateNode if componentNode is class-component.
     let elementChild: ElementNode | null = null;
     let componentChild: ComponentNode;
-    if((eleType as typeof BaseComponent).isVirtualDOMComponent) {
-        const _eleType =  eleType as typeof BaseComponent;
+    if((eleType as ClassComponentType).isVirtualDOMComponent) {
+        const _eleType =  eleType as ClassComponentType;
         componentNode.stateNode = new _eleType(props);
         componentNode.stateNode._internalComponentNode = componentNode;
         elementChild = componentNode.stateNode.render() as ElementNode;

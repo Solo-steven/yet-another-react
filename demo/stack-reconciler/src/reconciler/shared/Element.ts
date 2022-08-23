@@ -1,23 +1,21 @@
 export class BaseComponent {
     static isVirtualDOMComponent = true;
     state: any;
+    props: { [key: string]: any};
     _internalComponentNode: any;
-    constructor(props?:PropsType) {
+    constructor(props:{ [key: string]: any} = {}) {
+        this.props = props;
     }
-    setState() {
-        
-    }
-    render(): any {
-
+    render(): ElementNode | null {
+        return null;
     }
 }
-
 export type CSSProperity = {[key: string]: any};
 export interface PropsType extends CSSProperity  {
     children: Array<ElementNode>;
 }
 
-export type FunctionComponentType = ((props: PropsType) => ElementNode) | (() => ElementNode);
+export type FunctionComponentType = ((props: {[key: string]: any}) => ElementNode | null) | (() => ElementNode | null);
 export type ClassComponentType = typeof BaseComponent;
 export type HostComponentType = string;
 

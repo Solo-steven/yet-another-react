@@ -80,7 +80,7 @@ function createCustomComponentNode(element: ElementNode): CustomComponentNode {
 }
 
 function createHostTextComponentNode(element: ElementNode): HostTextComponentNode {
-    if(typeof(element) !== "string") {
+    if(!(typeof(element) === "string" || typeof(element) === "number")) {
         throw new Error(``);
     }
     return {

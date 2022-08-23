@@ -1,8 +1,8 @@
-import { createElement, BaseComponent, PropsType } from "./reconciler/shared/Element";
-import { getHostNode } from "./reconciler/shared/Component";
+import { createElement } from "./reconciler/shared/Element";
+import { Component } from "@/src/library/component";
 import { createContainer } from "@/src/library/container";
 
-function FunComponent (props: PropsType) {
+function FunComponent (props: { [key: string]: any } = { }) {
     const child = props?.children ? props.children : [];
     const value = props.value ?  props.value : -1;
     return createElement(
@@ -13,12 +13,17 @@ function FunComponent (props: PropsType) {
         ] },
     )
 }
-class MyComponent extends BaseComponent {
-    constructor(props?: PropsType) {
+class MyComponent extends Component {
+    count: number;
+    constructor(props: { [key: string]: any } = { }) {
         super(props);
+        this.state = {
+            value: 10,
+        }
+        this.count = 0;
     }
     tigger() {
-        this.setState();
+        this.setState({value: 20});
     }
     /**
         <div>
@@ -32,11 +37,22 @@ class MyComponent extends BaseComponent {
         </div>
      */
     render() {
+        this.count ++;
         return createElement(
             "div",
             {
                 children: [
-                    "good",
+                    createElement(
+                        "p",
+                        {
+                            children: [
+                                `Count State: ${this.count}`,
+                            ]
+                        }
+                    ),
+                    "good ",
+                    this.props.value ? this.props.value : "10",
+                    this.state.value,
                     createElement(
                         "div",
                         {
@@ -77,6 +93,7 @@ const PureDOMApp = (state: number) => createElement(
             createElement(
                 "div",
                 {
+                    "style" : state > 10 ? "color:blue;" : "color:red;",
                     children: [
                         state <= 10 
                             ?  createElement(
@@ -105,6 +122,13 @@ const PureDOMApp = (state: number) => createElement(
                         "xshaxbsa"
                     ]
                 }
+            ),
+            createElement(
+                MyComponent,
+                {
+                    value : state > 10 ? "state > 10" : "state < 10",
+                    children: [],
+                }
             )
         ]
     }
@@ -116,19 +140,25 @@ const container = createContainer(root as Element);
 
 container.render(
     // <MyComponent />
-    PureDOMApp(10),
+    //PureDOMApp(10),
+    createElement(
+        MyComponent,
+    )
 )
 
-console.log(getHostNode(container.appRootComponent as any));
-
 setTimeout(() => {
-    console.log("Call Render");
-    container.render(
-        // <MyComponent />
-        PureDOMApp(90)
-    )
+    const instance = container.appRootComponent?.stateNode as any;
+    console.log(instance);
+    instance.tigger();
+}, 2000)
+// setTimeout(() => {
+//     console.log("Call Render");
+//     container.render(
+//         // <MyComponent />
+//         PureDOMApp(90)
+//     )
     
-}, 800)
+// }, 800)
 
 
 
