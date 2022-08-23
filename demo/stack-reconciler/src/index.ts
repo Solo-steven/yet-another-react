@@ -1,7 +1,12 @@
+// This File serve as Test script.
 import { createElement } from "./reconciler/shared/Element";
 import { Component } from "@/src/library/component";
 import { createContainer } from "@/src/library/container";
-
+/**
+ * Shared component for test.
+ * @param props 
+ * @returns 
+ */
 function FunComponent (props: { [key: string]: any } = { }) {
     const child = props?.children ? props.children : [];
     const value = props.value ?  props.value : -1;
@@ -37,6 +42,7 @@ class MyComponent extends Component {
         </div>
      */
     render() {
+        console.log("Call", performance.now());
         this.count ++;
         return createElement(
             "div",
@@ -74,8 +80,19 @@ class MyComponent extends Component {
         )
     }
 };
-
-
+const ClassComponent = () => createElement(MyComponent);
+function testClassRootComponent() {
+    const root = document.getElementById('app');
+    const container = createContainer(root as Element);
+    container.render(
+        ClassComponent()
+    )
+    setTimeout(() => {
+        const instance = container.appRootComponent?.stateNode as any;
+        console.log(instance);
+        instance.tigger();
+    }, 2000)
+};
 
 const PureDOMApp = (state: number) => createElement(
     'div',
@@ -133,35 +150,17 @@ const PureDOMApp = (state: number) => createElement(
         ]
     }
 )
-
-
-const root = document.getElementById('app');
-const container = createContainer(root as Element);
-
-container.render(
-    // <MyComponent />
-    //PureDOMApp(10),
-    createElement(
-        MyComponent,
+function testPureDOMApp() {
+    const root = document.getElementById('app');
+    const container = createContainer(root as Element);
+    container.render(
+        PureDOMApp(10),
     )
-)
+    setTimeout(() => {
+        container.render(
+            PureDOMApp(90)
+        ) 
+    }, 800)
+}
 
-setTimeout(() => {
-    const instance = container.appRootComponent?.stateNode as any;
-    console.log(instance);
-    instance.tigger();
-}, 2000)
-// setTimeout(() => {
-//     console.log("Call Render");
-//     container.render(
-//         // <MyComponent />
-//         PureDOMApp(90)
-//     )
-    
-// }, 800)
-
-
-
-
-
-
+testPureDOMApp();

@@ -1,6 +1,6 @@
 import { ElementNode} from "@/src/reconciler/shared/Element";
 import { ComponentNode, createComponentNodeFromElementNode, getHostNode } from "@/src/reconciler/shared/Component";
-import { reconcilerComponentNode } from "@/src/reconciler/update";
+import { reconcilerComponentNode } from "@/src/reconciler/reconciler";
 import { addEffect, commitEffect } from "@/src/reconciler/commit";
 import { appendChild } from "@/src/renderer/HostConfig";
 class HostContainter {
@@ -44,7 +44,7 @@ class HostContainter {
 }
 
 /**
- * 
+ *  React-like api format.
  */
 export function createContainer(root: Element): HostContainter {
     return new HostContainter(root);

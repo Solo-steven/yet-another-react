@@ -1,6 +1,6 @@
 import { BaseComponent } from "@/src/reconciler/shared/Element";
 import { ComponentNode, createComponentNodeFromElementNode } from "../reconciler/shared/Component";
-import { reconcilerComponentNode } from "@/src/reconciler/update";
+import { reconcilerComponentNode } from "@/src/reconciler/reconciler";
 import { commitEffect } from "@/src/reconciler/commit";
 
 export class Component extends BaseComponent {
@@ -8,27 +8,23 @@ export class Component extends BaseComponent {
         super(props);
     }
     /**
-     * 
-     * @param nextState 
+     * render serve as two purpose function.
+     * frist purpose is update state.
+     * second purpose is entry to reconciler function.
+     * @param nextState : next state.
+     * @returns void
      */
     setState(nextState: {[key: string]: any } = {}) {
         // Prepare
-        const componetNode = this._internalComponentNode as ComponentNode;
-        const element = componetNode.element;
+        const current = this._internalComponentNode as ComponentNode;
+        const element = current.element;
         const workInProgress = createComponentNodeFromElementNode(element);
-        workInProgress.stateNode = componetNode.stateNode;
-        // Render
+        workInProgress.stateNode = current.stateNode;
         const instance = workInProgress.stateNode as BaseComponent;
         instance.state = Object.assign(instance.state, nextState);
-        console.log(instance.state, nextState);
-        const nextChildrenElement = instance.render();
-        if(nextChildrenElement === null) {
-            return;
-        }
-        const current = this._internalComponentNode;
-        workInProgress.renderedChildren = createComponentNodeFromElementNode(nextChildrenElement);
+        // Render.
         reconcilerComponentNode(current, workInProgress);
-        // commit effect.
+        // Commit effect.
         commitEffect();
     }
 }

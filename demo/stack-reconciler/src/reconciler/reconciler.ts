@@ -13,7 +13,7 @@ import {
 import { renderComponentNode  } from "@/src/reconciler/mount";
 import { addEffect } from "@/src/reconciler/commit";
 import {
-    appendChild, replaceChild, 
+    appendChild, replaceChild, replaceNode,
     updateInstance, updateTextnstance
 } from "@/src/renderer/HostConfig";
 /**
@@ -58,7 +58,8 @@ function reconcilerHostTextComponentNode(
             const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current);
             const newChild = workInProgress.stateNode as Text;
-            replaceChild(parent, oldChild, newChild);
+            replaceNode(oldChild as Element, newChild);
+            // replaceChild(parent, oldChild, newChild);
         });
         return workInProgress;
     }
@@ -102,7 +103,8 @@ function reconcilerHostComponentNode(
             const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current) as Element;
             const newChild = workInProgress.stateNode as Element;
-            replaceChild(parent, oldChild, newChild);
+            replaceNode(oldChild, newChild);
+            // replaceChild(parent, oldChild, newChild);
         })
         return workInProgress;
     }
@@ -170,7 +172,8 @@ function reconcilerCustomComponentNode(
             const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current) as Element;
             const newChild = getHostNode(workInProgress);
-            replaceChild(parent, oldChild, newChild);
+            replaceNode(oldChild, newChild);
+            // replaceChild(parent, oldChild, newChild);
         })
         return workInProgress;
     }
@@ -190,7 +193,8 @@ function reconcilerCustomComponentNode(
             const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current) as Element;
             const newChild = getHostNode(workInProgress);
-            replaceChild(parent, oldChild, newChild);
+            replaceNode(oldChild, newChild);
+            // replaceChild(parent, oldChild, newChild);
         });
         return workInProgress;
     }
