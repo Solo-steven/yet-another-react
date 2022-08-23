@@ -1,7 +1,14 @@
 {
   "name": "yat-another-react",
   "version": "1.0.0",
-  "main": "index.js",
+  "private":"true",
+  "workspaces": [
+    "demo/*"
+  ],
+  "scripts": {
+    "demo:lec-1": "yarn workspace virtual-dom start",
+    "demo:lec-2": "yarn workspace three-layer-model start"
+  },
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.18.9",

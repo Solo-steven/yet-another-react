@@ -11,14 +11,10 @@
 
 假如今天有一隻 api GET `http://localhost:3000/fake` 會傳傳下面的資料，而你需要根據下面的資料做出一個簡易的 UI。再來，因為 data 可能改變，需要有一個 refresh button 給 user，讓使用者可以重新發起 api-call。
 
+
 上面的例子中，每當有一個新的 api call 完成，我們就重新創造一次 UI。這樣的方法看起來沒問題，但其實我們不用每一次都創造一次新的 UI，也可以經由比對的方式減少對 DOM 的操作。所以，我們改寫部分的 `renderUIByCallAPI` function 中的邏輯。
 
-<iframe src="https://codesandbox.io/embed/update-ui-logic-9hgngo?fontsize=14&hidenavigation=1&theme=dark"
-     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
-     title="update-UI-Logic"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-   ></iframe>
+[](https://codesandbox.io/embed/update-ui-logic-9hgngo?fontsize=14&hidenavigation=1&theme=dark)[https://codesandbox.io/embed/update-ui-logic-9hgngo?fontsize=14&amp;hidenavigation=1&amp;theme=dark](https://codesandbox.io/embed/update-ui-logic-9hgngo?fontsize=14&hidenavigation=1&theme=dark)
 
 這樣的方法有什麼差別？我們可以由打開 devtool 中的 performance tab 去看清楚，這兩中方法的差別，
 
