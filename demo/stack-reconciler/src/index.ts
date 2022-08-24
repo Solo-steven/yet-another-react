@@ -17,7 +17,7 @@ import { createContainer } from "@/src/library/container";
  * @returns 
  */
 function FunComponent (props: { [key: string]: any } = { }) {
-    const child = props?.children ? props.children : [];
+    const child = props.children ? props.children : [];
     const value = props.value ?  props.value : -1;
     return createElement(
         "div",
