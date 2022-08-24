@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "demo:lec-1": "yarn workspace virtual-dom start",
-    "demo:lec-2": "yarn workspace three-layer-model start"
+    "demo:lec-2": "yarn workspace stack-reconciler start"
   },
   "license": "MIT",
   "devDependencies": {

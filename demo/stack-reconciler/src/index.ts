@@ -1,4 +1,13 @@
-// This File serve as Test script.
+/**
+ * ===============================================
+ *              Test Script 
+ * -----------------------------------------------
+ * lib should act like following:
+ *  1. call `createContainer` to create a new container instance.
+ *  2. call `render` or call `setState` to re-render.
+ *  *** createElement is JSX function ***
+ * ==============================================
+ */
 import { createElement } from "./reconciler/shared/Element";
 import { Component } from "@/src/library/component";
 import { createContainer } from "@/src/library/container";
@@ -18,6 +27,15 @@ function FunComponent (props: { [key: string]: any } = { }) {
         ] },
     )
 }
+/**
+ * ===============================================
+ *            Test - Class Component
+ * -----------------------------------------------
+ *  test render a app with root is class component
+ *  and setState should cat tigger re-render, and 
+ *  update state.
+ * ==============================================
+ */
 class MyComponent extends Component {
     count: number;
     constructor(props: { [key: string]: any } = { }) {
@@ -30,19 +48,7 @@ class MyComponent extends Component {
     tigger() {
         this.setState({value: 20});
     }
-    /**
-        <div>
-            good
-            <div>
-                uu
-            </div>
-            <FunComponent>
-                nothinbs
-            </FunComponent>
-        </div>
-     */
     render() {
-        console.log("Call", performance.now());
         this.count ++;
         return createElement(
             "div",
@@ -80,7 +86,10 @@ class MyComponent extends Component {
         )
     }
 };
-const ClassComponent = () => createElement(MyComponent);
+const ClassComponent = (props = {
+    value: 50, 
+    children: []
+}) => createElement(MyComponent, props);
 function testClassRootComponent() {
     const root = document.getElementById('app');
     const container = createContainer(root as Element);
@@ -89,11 +98,17 @@ function testClassRootComponent() {
     )
     setTimeout(() => {
         const instance = container.appRootComponent?.stateNode as any;
-        console.log(instance);
         instance.tigger();
     }, 2000)
 };
-
+/**
+ * ===============================================
+ *            Test - Pure DOM Component
+ * -----------------------------------------------
+ *  test render a app with host-component root,
+ *  and use render function to re-render.
+ * ==============================================
+ */
 const PureDOMApp = (state: number) => createElement(
     'div',
     {
@@ -162,5 +177,11 @@ function testPureDOMApp() {
         ) 
     }, 800)
 }
-
+/**
+ * ===============================================
+ *            Test Main Zone
+ * -----------------------------------------------
+ *          call test-function
+ * ==============================================
+ */
 testPureDOMApp();
