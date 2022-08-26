@@ -35,6 +35,7 @@ export type CustomComponentNode = {
     tag: CustomComponentNodeTag,
     element: ComponentElementNode,
     stateNode: BaseComponent | null,
+    pendingState: any;
     renderedChildren: ComponentNode | null;
 }
 
@@ -76,6 +77,7 @@ function createCustomComponentNode(element: ElementNode): CustomComponentNode {
         element,
         renderedChildren: null,
         stateNode: null,
+        pendingState: null,
     }as CustomComponentNode
 }
 

@@ -184,4 +184,4 @@ function testPureDOMApp() {
  *          call test-function
  * ==============================================
  */
-testPureDOMApp();
+testClassRootComponent();

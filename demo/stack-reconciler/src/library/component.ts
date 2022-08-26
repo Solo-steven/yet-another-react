@@ -1,5 +1,5 @@
 import { BaseComponent } from "@/src/reconciler/shared/Element";
-import { ComponentNode, createComponentNodeFromElementNode } from "../reconciler/shared/Component";
+import { CustomComponentNode, createComponentNodeFromElementNode } from "../reconciler/shared/Component";
 import { reconcilerComponentNode } from "@/src/reconciler/reconciler";
 import { commitEffect } from "@/src/reconciler/commit";
 
@@ -16,12 +16,10 @@ export class Component extends BaseComponent {
      */
     setState(nextState: {[key: string]: any } = {}) {
         // Prepare
-        const current = this._internalComponentNode as ComponentNode;
+        const current = this._internalComponentNode as CustomComponentNode;
+        current.pendingState = nextState;
         const element = current.element;
         const workInProgress = createComponentNodeFromElementNode(element);
-        workInProgress.stateNode = current.stateNode;
-        const instance = workInProgress.stateNode as BaseComponent;
-        instance.state = Object.assign(instance.state, nextState);
         // Render.
         reconcilerComponentNode(current, workInProgress);
         // Commit effect.

@@ -32,6 +32,28 @@ import {
  *   3. continue 
  * ==========================================
  */
+
+function createNewSubTree(workInProgress: ComponentNode, paths: Array<ComponentNode> ) {
+    renderComponentNode(workInProgress);
+    const shaowCopyPaths = [...paths];
+    addEffect(() => {
+        const parent = findClosestDOM(shaowCopyPaths);
+        const newChild = workInProgress.stateNode as Text | Element;
+        appendChild(parent, newChild);
+    });
+    return workInProgress;
+}
+
+function replaceOldSubTree(current: ComponentNode, workInProgress: ComponentNode) {
+    renderComponentNode(workInProgress);
+    addEffect(() => {
+        const oldChild = getHostNode(current);
+        const newChild = workInProgress.stateNode as Text;
+        replaceNode(oldChild as Element, newChild);
+    });
+    return workInProgress;
+}
+
 function reconcilerHostTextComponentNode(
     current: ComponentNode | null,
     workInProgress: HostTextComponentNode,
@@ -53,13 +75,10 @@ function reconcilerHostTextComponentNode(
     // Case 2 : Tag is different. unmount pre-component.
     if(current.tag !== workInProgress.tag) {
         renderComponentNode(workInProgress);
-        const shaowCopyPaths = [...paths];
         addEffect(() => {
-            const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current);
             const newChild = workInProgress.stateNode as Text;
             replaceNode(oldChild as Element, newChild);
-            // replaceChild(parent, oldChild, newChild);
         });
         return workInProgress;
     }
@@ -97,10 +116,8 @@ function reconcilerHostComponentNode(
     // render new componentNode and add side-effect to change dom.
     if(current.tag !== workInProgress.tag) {
         renderComponentNode(workInProgress);
-        const shaowCopyPaths = [...paths];
         addEffect(() => {
             // side-effect is to replace child from parentNode.
-            const parent = findClosestDOM(shaowCopyPaths);
             const oldChild = getHostNode(current) as Element;
             const newChild = workInProgress.stateNode as Element;
             replaceNode(oldChild, newChild);
@@ -200,11 +217,13 @@ function reconcilerCustomComponentNode(
     }
     // element type is same.
     const nextProps = workInProgress.element.props;
+    const nextState = current.pendingState;
     workInProgress.stateNode = current.stateNode;
     let nextChildrenElement: ElementNode | null = null;
     if((workInProgress.element.type as ClassComponentType).isVirtualDOMComponent) {
         const instance = workInProgress.stateNode as BaseComponent;
         instance.props = nextProps;
+        instance.state = nextState === null ? instance.state : Object.assign(instance.state, nextState);
         nextChildrenElement = instance.render();
     }else {
         const func = workInProgress.element.type as FunctionComponentType;
