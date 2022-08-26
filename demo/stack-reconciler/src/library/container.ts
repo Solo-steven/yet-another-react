@@ -34,7 +34,11 @@ class HostContainter {
         if(fristRenderFlag) {
             addEffect(() => {
                 const childHostRoot = getHostNode(workInProgress);
-                appendChild(this.internalHostInstance, childHostRoot);
+                // TODO: BUG, if root-component is custome component, and frist render is null.
+                // next render would not working in setState
+                if(childHostRoot)
+                    appendChild(this.internalHostInstance, childHostRoot);
+                
             })
         }
         this.appRootComponent = workInProgress;

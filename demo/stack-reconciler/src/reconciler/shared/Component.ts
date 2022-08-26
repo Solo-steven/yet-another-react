@@ -21,7 +21,7 @@ export type HostComponentNode = {
     tag: HostComponentNodeTag;
     element: ComponentElementNode;
     stateNode: Element | null;
-    renderedChildren: Array<ComponentNode> | null;
+    renderedChildren: Array<ComponentNode>;
 }
 
 export type HostTextComponentNode = {
@@ -122,12 +122,15 @@ export function findClosestDOM(paths: Array<ComponentNode>): Element | null {
     return null;
 }
 
-export function getHostNode(componentNode: ComponentNode): Element | Text {
+export function getHostNode(componentNode: ComponentNode | null): Element | Text | null {
+    if(componentNode === null) {
+        return null;
+    }
     if(componentNode.tag === "HostTextComponent") {
         return componentNode.stateNode as Text;
     }
     if(componentNode.tag === "HostComponent") {
         return componentNode.stateNode as Element;
     }
-    return getHostNode(componentNode.renderedChildren as ComponentNode);
+    return getHostNode(componentNode.renderedChildren);
 };

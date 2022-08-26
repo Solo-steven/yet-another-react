@@ -17,14 +17,15 @@ export function appendChild(parent: Element| null, child: Element | Text ): void
         parent.append(child);
     }
 }
-export function replaceChild(parent: Element | null, oldChild: Element | Text,  newChild: Element| Text): void {
-    if(parent === null) {
-        throw new Error(``);
-    }
-    parent.replaceChild(newChild, oldChild);
-}
 export function replaceNode(node: Element, newNode: Element | Text) {
     node.replaceWith(newNode);
+}
+export function removeNode(node: Element | Text | null) {
+    if(node === null) {
+        return;
+    }
+    node.remove();
+    return;
 }
 export function updateTextnstance(textInstance: Text, newContent: string | number): void {
     newContent = typeof(newContent) === "string" ? newContent : String(newContent);

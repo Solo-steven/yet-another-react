@@ -50,7 +50,7 @@ class MyComponent extends Component {
     }
     render() {
         this.count ++;
-        return createElement(
+        return  this.props.value === "100" ? null : createElement(
             "div",
             {
                 children: [
@@ -158,7 +158,7 @@ const PureDOMApp = (state: number) => createElement(
             createElement(
                 MyComponent,
                 {
-                    value : state > 10 ? "state > 10" : "state < 10",
+                    value : state < 10 ? "10" : "100",
                     children: [],
                 }
             )
@@ -184,4 +184,4 @@ function testPureDOMApp() {
  *          call test-function
  * ==============================================
  */
-testClassRootComponent();
+testPureDOMApp();

@@ -82,8 +82,10 @@ function renderCustomComponentNode(
         componentNode.stateNode = null;
         elementChild = _eleType(props) as ElementNode;
     }
+    if(elementChild === null) {
+        return componentNode;
+    }
     componentChild = createComponentNodeFromElementNode(elementChild);
-
     // Recursively Call to mount child.
     paths.push(componentNode);
     componentNode.renderedChildren = renderComponentNode(componentChild, paths);
