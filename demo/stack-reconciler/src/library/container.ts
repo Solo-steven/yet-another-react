@@ -1,8 +1,7 @@
 import { ElementNode} from "@/src/reconciler/shared/Element";
-import { ComponentNode, createComponentNodeFromElementNode, getHostNode } from "@/src/reconciler/shared/Component";
+import { ComponentNode, createHostRootComponentNode } from "@/src/reconciler/shared/Component";
 import { reconcilerComponentNode } from "@/src/reconciler/reconciler";
-import { addEffect, commitEffect } from "@/src/reconciler/commit";
-import { appendChild } from "@/src/renderer/HostConfig";
+import { commitEffect } from "@/src/reconciler/commit";
 class HostContainter {
     internalHostInstance: Element;
     appRootComponent: ComponentNode | null;
@@ -16,7 +15,8 @@ class HostContainter {
      */
     constructor(root: Element) {
         this.internalHostInstance = root;
-        this.appRootComponent = null;
+        this.appRootComponent = createHostRootComponentNode(null);
+        this.appRootComponent.stateNode = root;
     }
     /**
      * render serve as two purpose function.
@@ -27,20 +27,9 @@ class HostContainter {
      */
     render(element: ElementNode) {
         // Render Phase ( see as another reconciler update function ).
-        const fristRenderFlag = this.appRootComponent === null;
         const current = this.appRootComponent;
-        const workInProgress = createComponentNodeFromElementNode(element);
+        const workInProgress = createHostRootComponentNode(element);
         reconcilerComponentNode(current, workInProgress);
-        if(fristRenderFlag) {
-            addEffect(() => {
-                const childHostRoot = getHostNode(workInProgress);
-                // TODO: BUG, if root-component is custome component, and frist render is null.
-                // next render would not working in setState
-                if(childHostRoot)
-                    appendChild(this.internalHostInstance, childHostRoot);
-                
-            })
-        }
         this.appRootComponent = workInProgress;
         // Commit Phase (commit all side effect).
         commitEffect();

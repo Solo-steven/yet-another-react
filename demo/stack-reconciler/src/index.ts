@@ -17,14 +17,28 @@ import { createContainer } from "@/src/library/container";
  * @returns 
  */
 function FunComponent (props: { [key: string]: any } = { }) {
-    const child = props.children ? props.children : [];
-    const value = props.value ?  props.value : -1;
+    const children = props.children ? props.children : [];
+    console.log(children, ...children);
     return createElement(
         "div",
-        { children: [
-            ...child,
-            `value is ${value}`
-        ] },
+        { 
+            children: [
+                createElement(
+                    "h3",
+                    {
+                        children: ["This is Title for Function Component"]
+                    }
+                ),
+                "Some Text Content for Testing",
+                createElement(
+                    "p",
+                    {
+                        children: [`current props value is : ${props.value ? props.value : "No Props In" }`]
+                    }
+                ),
+                ...children,
+            ] 
+        },
     )
 }
 /**
@@ -46,7 +60,7 @@ class MyComponent extends Component {
         this.count = 0;
     }
     tigger() {
-        this.setState({value: 20});
+        this.setState({value: this.state.value + 10});
     }
     render() {
         this.count ++;
@@ -55,29 +69,29 @@ class MyComponent extends Component {
             {
                 children: [
                     createElement(
-                        "p",
+                        "h1", 
                         {
-                            children: [
-                                `Count State: ${this.count}`,
-                            ]
+                            children: [ "This is Title of Class Component"]
                         }
                     ),
-                    "good ",
-                    this.props.value ? this.props.value : "10",
-                    this.state.value,
                     createElement(
-                        "div",
+                        "p",
                         {
-                            children: [
-                                "uu"
-                            ]
+                            children: [`current state value is : ${this.state.value}`]
+                        }
+                    ),
+                    "Some Text Content for Testing",
+                    createElement(
+                        "p",
+                        {
+                            children: [`current props value is : ${this.props.value ? this.props.value : "No Props In" }`]
                         }
                     ),
                     createElement(
                         FunComponent,
                         {
                             children: [
-                                "xshaxbsa"
+                                "Content Pass From Class Component"
                             ]
                         }
                     )
@@ -97,7 +111,8 @@ function testClassRootComponent() {
         ClassComponent()
     )
     setTimeout(() => {
-        const instance = container.appRootComponent?.stateNode as any;
+        const instance = (container.appRootComponent as any).renderedChildren.stateNode
+        console.log(container);
         instance.tigger();
     }, 2000)
 };
@@ -109,57 +124,75 @@ function testClassRootComponent() {
  *  and use render function to re-render.
  * ==============================================
  */
-const PureDOMApp = (state: number) => createElement(
+const PureDOMApp = (flag: boolean = false) => createElement(
     'div',
     {
         children: [
-            "text-in-first-div",
+            "Some Text Content for Testing",
             createElement(
-                state > 10 ? "p" : "div",
+                flag ? "p" : "div",
                 {
                     children: [
-                        "text-in-second-div"
+                        "Element Block Which Tag Would Changed By props's value."
                     ]
                 }
             ),
             createElement(
                 "div",
                 {
-                    "style" : state > 10 ? "color:blue;" : "color:red;",
+                    "style" : flag ? "color:blue;" : "color:red;",
                     children: [
-                        state <= 10 
-                            ?  createElement(
-                                "div",
-                                {
-                                    children: [' text-in-nested-div ']
-                                }
-                            ) 
-                            :"text-in-other-div"
+                        "Element Block Style Attr Would changed by props."
                     ]
                 }
             ),
             createElement(
-                'div',
+                "div",
                 {
-                    children: [
-                        `child with state: ${state}`
+                    children: flag ? [
+                        createElement(
+                            "span",
+                            {
+                                children: [ "Element Block" ]
+                            }
+                        ),
+                        createElement(
+                            "span",
+                            {
+                                children: [ "Structure Changed By Prop" ]
+                            }
+                        ),
+                        createElement(
+                            "span",
+                            {
+                                children: [ "Now is 3 Span" ]
+                            }
+                        )
+                    ] : [
+                        createElement(
+                            "span",
+                            {
+                                children: [ "Element Block Structure Changed By Prop Now is 1 Span" ]
+                            }
+                        )
                     ]
                 }
             ),
             createElement(
                 FunComponent,
                 {
-                    value: state <=10 ? -2 : 10,
+                    value: flag ? -2 : 10,
                     children: [
-                        "xshaxbsa"
+                        "Some Text Content Pass as Children to Function Component",
+                        createElement(
+                            "p",
+                            {
+                                children: [
+                                    "A P-tag Element Pass to Function Component",
+                                ]
+                            }
+                        )
                     ]
-                }
-            ),
-            createElement(
-                MyComponent,
-                {
-                    value : state < 10 ? "10" : "100",
-                    children: [],
                 }
             )
         ]
@@ -169,13 +202,15 @@ function testPureDOMApp() {
     const root = document.getElementById('app');
     const container = createContainer(root as Element);
     container.render(
-        PureDOMApp(10),
+        PureDOMApp(false),
     )
+    console.log(container);
     setTimeout(() => {
         container.render(
-            PureDOMApp(90)
+            PureDOMApp(true)
         ) 
-    }, 800)
+        console.log(container);
+    }, 800);
 }
 /**
  * ===============================================

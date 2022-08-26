@@ -8,7 +8,7 @@ import {
     CustomComponentNode, 
     HostComponentNode, HostTextComponentNode, 
     createComponentNodeFromElementNode,
-    findClosestDOM, getHostNode
+    findHostParentInAncestor, findHostRootOfTree, HostRootComponent,
 } from "@/src/reconciler/shared/Component";
 import { renderComponentNode  } from "@/src/reconciler/mount";
 import { addEffect } from "@/src/reconciler/commit";
@@ -32,14 +32,14 @@ import {
  *   3. continue 
  * ==========================================
  */
-function createNewSubTree(workInProgress: ComponentNode, paths: Array<ComponentNode> ) {
+function createNewSubTree(workInProgress: ComponentNode) {
     renderComponentNode(workInProgress);
-    const shaowCopyPaths = [...paths];
     addEffect(() => {
         // perform side-effect to mount new component-tree to it's host parent.
-        const parent = findClosestDOM(shaowCopyPaths);
+        const parent = findHostParentInAncestor(workInProgress);
+        const parentDOM = parent ? parent.stateNode : null;
         const newChild = workInProgress.stateNode as Text | Element;
-        appendChild(parent, newChild);
+        appendChild(parentDOM, newChild);
     });
     return workInProgress;
 }
@@ -47,7 +47,8 @@ function replaceOldSubTree(current: ComponentNode, workInProgress: ComponentNode
     renderComponentNode(workInProgress);
     addEffect(() => {
         // perform side-effect to replace last compoent-tree's host root.
-        const oldChild = getHostNode(current);
+        const oldComponentRoot = findHostRootOfTree(current);
+        const oldChild = oldComponentRoot?.stateNode;
         const newChild = workInProgress.stateNode as Text;
         replaceNode(oldChild as Element, newChild);
     });
@@ -57,7 +58,6 @@ function replaceOldSubTree(current: ComponentNode, workInProgress: ComponentNode
 function reconcilerHostTextComponentNode(
     current: HostTextComponentNode,
     workInProgress: HostTextComponentNode,
-    _paths: Array<ComponentNode> = [],
 ): ComponentNode {
     // Tag is same. because text instance don't need to  replace if next node
     // remind text instance. we can always resume text node in this case.
@@ -66,18 +66,16 @@ function reconcilerHostTextComponentNode(
     workInProgress.stateNode = current.stateNode;
     const preElement = current.element;
     const nexElement = workInProgress.element;
-    if(preElement === nexElement) {
-        return workInProgress;
+    if(preElement !== nexElement) {
+        addEffect(() => {
+            updateTextnstance(workInProgress.stateNode as Text, nexElement);
+        })
     }
-    addEffect(() => {
-        updateTextnstance(workInProgress.stateNode as Text, nexElement);
-    })
     return workInProgress;
 }
 function reconcilerHostComponentNode(
     current: HostComponentNode ,
     workInProgress: HostComponentNode,
-    paths: Array<ComponentNode> = [],
 ): ComponentNode {
     // Tag is same. divide by if element type is same.
     // Case 1 : if is not same element.type, we need to mount new componentNode, and add side-effect.
@@ -91,29 +89,29 @@ function reconcilerHostComponentNode(
     }
     // Update component Node.
     workInProgress.stateNode = current.stateNode;
-    workInProgress.renderedChildren = nextChildrenElement.map(child => createComponentNodeFromElementNode(child));
+    workInProgress.renderedChildren = nextChildrenElement.map(child =>  {
+        const componentChild = createComponentNodeFromElementNode(child);
+        componentChild.parent = workInProgress;
+        return componentChild;
+    });
     addEffect(() => {
         const nextProps = workInProgress.element.props;
         updateInstance(workInProgress.stateNode as Element, nextProps);
     })
     // Create Children.
-    paths.push(workInProgress);
     for(let i = 0 ; i < workInProgress.renderedChildren.length ; ++i) {
         const nextChildComponentNode = workInProgress.renderedChildren[i];
-        const currentChildComponentNode = (current.renderedChildren as Array<ComponentNode>)[i];
-        reconcilerComponentNode(
-            currentChildComponentNode,
-            nextChildComponentNode,
-            paths,
-        )
+        const currentChildComponentNode = current.renderedChildren[i] || null;
+        reconcilerComponentNode(currentChildComponentNode,nextChildComponentNode);
     }
-    paths.pop();
     // Delete Children
-    for(let i =  workInProgress.renderedChildren.length -1; i < current.renderedChildren.length ; ++i ) {
+    for(let i =  workInProgress.renderedChildren.length; i < current.renderedChildren.length ; ++i ) {
         const deleteComponentChild = current.renderedChildren[i];
         addEffect(() => {
-            const host = getHostNode(deleteComponentChild);
-            removeNode(host);
+            const hostRootOfDeletedChild = findHostRootOfTree(deleteComponentChild);
+            if(hostRootOfDeletedChild !== null) {
+                removeNode(hostRootOfDeletedChild.stateNode);
+            }
         })
     }
     return workInProgress;
@@ -121,7 +119,6 @@ function reconcilerHostComponentNode(
 function reconcilerCustomComponentNode(
     current: CustomComponentNode,
     workInProgress: CustomComponentNode,
-    paths: Array<ComponentNode> = [],
 ): ComponentNode {
     // Tag is Same. divide by if element type is same.
     // Case 1 : elment type is different. it means we need to create a new component-tree,
@@ -140,8 +137,10 @@ function reconcilerCustomComponentNode(
     let nextChildrenElement: ElementNode | null = null;
     if((workInProgress.element.type as ClassComponentType).isVirtualDOMComponent) {
         const instance = workInProgress.stateNode as BaseComponent;
+        instance._internalComponentNode = workInProgress;
         instance.props = nextProps;
-        instance.state = nextState === null ? instance.state : Object.assign(instance.state, nextState);
+        instance.state = !nextState ? instance.state : Object.assign(instance.state, nextState);
+        console.log(instance.state);
         nextChildrenElement = instance.render();
     }else {
         const func = workInProgress.element.type as FunctionComponentType;
@@ -151,20 +150,38 @@ function reconcilerCustomComponentNode(
     if(nextChildrenElement === null) {
         workInProgress.renderedChildren  = null;
         addEffect(() => {
-            const host = getHostNode(current);
-            if(host !== null) removeNode(host);
+            const hostRootOfDeletedChild = findHostRootOfTree(current);
+            if(hostRootOfDeletedChild !== null) {
+                removeNode(hostRootOfDeletedChild.stateNode);
+            }
         })
         return workInProgress;
     }
     // Create Children
     workInProgress.renderedChildren = createComponentNodeFromElementNode(nextChildrenElement);
-    paths.push(workInProgress);
+    workInProgress.renderedChildren.parent = workInProgress;
     reconcilerComponentNode(
         current.renderedChildren,
         workInProgress.renderedChildren,
-        paths,
     );
-    paths.pop();
+    return workInProgress;
+}
+
+function reconcilerHostRootComponent(
+    current: HostRootComponent,
+    workInProgress: HostRootComponent,
+): HostRootComponent {
+    workInProgress.stateNode = current.stateNode;
+    // Delete Host Children
+    if(!workInProgress.childrenElement) {
+        return workInProgress;
+    }
+    // Create Children
+    workInProgress.renderedChildren = createComponentNodeFromElementNode(workInProgress.childrenElement);
+    workInProgress.renderedChildren.parent = workInProgress;
+    const nextChildComponentNode = workInProgress.renderedChildren;
+    const currentChildComponentNode = current.renderedChildren;
+    reconcilerComponentNode(currentChildComponentNode, nextChildComponentNode);
     return workInProgress;
 }
 
@@ -172,20 +189,18 @@ function reconcilerCustomComponentNode(
  * 
  * @param current 
  * @param workInProgress 
- * @param paths 
  * @returns 
  * ===============================================
  */
 export function reconcilerComponentNode(
     current: ComponentNode | null,
-    workInProgress: ComponentNode,
-    paths: Array<ComponentNode> = [],
+    workInProgress: ComponentNode
 ): ComponentNode {
     // Case 1 : Current is null. it means we has to render a new 
     // component tree. and mount new component-tree's host-root to 
     // ancestor's host-node in commit phase.
     if(current === null) {
-        return createNewSubTree(workInProgress, paths);
+        return createNewSubTree(workInProgress);
     }
     // Case 2 : Tag is different. unmount last component tree. and 
     // create a new component-tree, than replace new component-tree's
@@ -197,14 +212,17 @@ export function reconcilerComponentNode(
     // For CustomComponent, it needs to update stateNode and render new component-child
     // For HostComponent, it needs to update host-node and render new component-children
     // for HostTextComponent, it need to update instance.
+    if(workInProgress.tag === "HostRootComponent") {
+        return reconcilerHostRootComponent(current as HostRootComponent, workInProgress);
+    }
     if(workInProgress.tag === "HostComponent") {
-        return reconcilerHostComponentNode(current as HostComponentNode, workInProgress, paths);
+        return reconcilerHostComponentNode(current as HostComponentNode, workInProgress);
     }
     if(workInProgress.tag === "HostTextComponent") {
-        return reconcilerHostTextComponentNode(current as HostTextComponentNode, workInProgress, paths);
+        return reconcilerHostTextComponentNode(current as HostTextComponentNode, workInProgress);
     }
     if(workInProgress.tag === "CustomComponent") {
-        return reconcilerCustomComponentNode(current as CustomComponentNode, workInProgress, paths)
+        return reconcilerCustomComponentNode(current as CustomComponentNode, workInProgress);
     }
     throw new Error(`[Error]: Unknow Component tag happend.`);
 }

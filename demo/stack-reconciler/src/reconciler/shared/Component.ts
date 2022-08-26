@@ -17,30 +17,36 @@ export type ComponentNodeTag = HostComponentNodeTag | HostTextComponentNodeTag |
  * Component Node's Type
  * =================
  */
+export type HostRootComponent = {
+    tag: "HostRootComponent";
+    childrenElement: ElementNode | null;
+    stateNode: Element | null;
+    parent: null;
+    renderedChildren: ComponentNode | null;
+}
 export type HostComponentNode = {
     tag: HostComponentNodeTag;
     element: ComponentElementNode;
     stateNode: Element | null;
+    parent: ComponentNode | null;
     renderedChildren: Array<ComponentNode>;
 }
-
 export type HostTextComponentNode = {
     tag: HostTextComponentNodeTag,
     element: LiteralElementNode,
     stateNode: Text | null;
+    parent: ComponentNode | null;
     renderedChildren: null;
 }
-
 export type CustomComponentNode = {
     tag: CustomComponentNodeTag,
     element: ComponentElementNode,
     stateNode: BaseComponent | null,
     pendingState: any;
+    parent: ComponentNode | null;
     renderedChildren: ComponentNode | null;
 }
-
-export type ComponentNode = HostComponentNode | HostTextComponentNode | CustomComponentNode ;
-
+export type ComponentNode =  HostRootComponent | HostComponentNode | HostTextComponentNode | CustomComponentNode ;
 /**
  * ==========================================
  *          Create a Components Node
@@ -61,10 +67,10 @@ function createHostComponentNode(element:ElementNode ): HostComponentNode {
         tag: "HostComponent",
         element: element,
         renderedChildren: [],
+        parent: null,
         stateNode: null,
     } as HostComponentNode
 }
-
 function createCustomComponentNode(element: ElementNode): CustomComponentNode {
     if(typeof(element) === "string" || typeof(element) === "number") {
         throw new Error(``);
@@ -75,12 +81,12 @@ function createCustomComponentNode(element: ElementNode): CustomComponentNode {
     return {
         tag: "CustomComponent",
         element,
+        parent: null,
         renderedChildren: null,
         stateNode: null,
         pendingState: null,
     }as CustomComponentNode
 }
-
 function createHostTextComponentNode(element: ElementNode): HostTextComponentNode {
     if(!(typeof(element) === "string" || typeof(element) === "number")) {
         throw new Error(``);
@@ -90,7 +96,18 @@ function createHostTextComponentNode(element: ElementNode): HostTextComponentNod
         element,
         stateNode: null,
         renderedChildren: null,
+        parent: null,
     } as HostTextComponentNode;
+}
+
+export function createHostRootComponentNode(childrenElement: ElementNode | null) {
+    return {
+        tag: "HostRootComponent",
+        childrenElement: childrenElement,
+        stateNode: null,
+        parent: null,
+        renderedChildren: null,
+    } as HostRootComponent;
 }
 export function createComponentNodeFromElementNode (element: ElementNode): ComponentNode {
     if(typeof(element) === "string" || typeof(element) === "number") {
@@ -106,31 +123,31 @@ export function createComponentNodeFromElementNode (element: ElementNode): Compo
  *          Util function
  * -----------------------------------------
  *  some helper.
- *  1.`findCloseDOM`: find a near parent in a 
- *  root-to-parent array.
- *  2. `getHostNode`: find host-root in a
- *  component-node tree. 
  * ==========================================
  */
-export function findClosestDOM(paths: Array<ComponentNode>): Element | null {
-    for(let i = paths.length - 1 ; i >= 0 ; --i) {
-        const componentNode = paths[i];
-        if(componentNode.stateNode instanceof Element) {
-            return componentNode.stateNode;
+
+export function findHostParentInAncestor(node: ComponentNode): HostComponentNode | null {
+    let current: ComponentNode | null = node.parent;
+    while(current) {
+        if(current.stateNode instanceof Element) {
+            return current as HostComponentNode;
         }
+        current = current.parent;
     }
     return null;
 }
 
-export function getHostNode(componentNode: ComponentNode | null): Element | Text | null {
-    if(componentNode === null) {
-        return null;
+export function findHostRootOfTree(root: ComponentNode) {
+    while(root) {
+        if(root.tag === "HostComponent") {
+            return root;
+        }
+        if(root.tag === "HostTextComponent") {
+            return root;
+        }
+        if(root.renderedChildren === null) 
+            return null;
+        root = root.renderedChildren;
     }
-    if(componentNode.tag === "HostTextComponent") {
-        return componentNode.stateNode as Text;
-    }
-    if(componentNode.tag === "HostComponent") {
-        return componentNode.stateNode as Element;
-    }
-    return getHostNode(componentNode.renderedChildren);
-};
+    return null;
+}
