@@ -1,4 +1,4 @@
-# Yat-Another-React
+# Yet-Another-React
 
 this repo is for learning react source code, collecting some resources found in the community, and building some simple demos to mock react behavior. Key Feature thay different this repo to others is that I try to build react step by step, every folder in demo folder would implement part of react faeture. from simple to hard concept. Instead of teach you reading react source code, this repo would try to introduce concepts in react with problem.
 
