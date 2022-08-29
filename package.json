@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "demo:lec-1": "yarn workspace virtual-dom start",
-    "demo:lec-2": "yarn workspace stack-reconciler start"
+    "demo:lec-2": "yarn workspace stack-reconciler start",
+    "demo:lec-3": "yarn workspace task-sceduler start"
   },
   "license": "MIT",
   "devDependencies": {
