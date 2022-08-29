@@ -2,11 +2,11 @@
 
 this is repo still ongoing.
 
-this repo is for learning react source code, collecting some resources found in the community, and building some simple demos to mock react behavior. The key feature that differentiates this repo from others is that I try to build react step by step, every folder in the demo folder would implement a part of react feature. from simple to hard concepts. Instead of teaching you to read react source code, this repo would try to introduce concepts in react with problem.
+This repo is used to learn react source code, collect some resources from the community, and build some simple demos to simulate react behavior. The key feature that sets this repo apart from others is that I try to build react incrementally, each folder in the demo folder implements some of the react functionality. Concept from easy to difficult. This repo doesn't teach you to read React source code but tries to introduce the concept of React by examples.
 
 ### Prerequest
 
-Most of react source code are about traversal a Tree data structure, make sure you are familiar with the DFS Algorithm (preorder-traversal in particular), And you can solve some simple problems like tree-equal, tree-height ..etc. below is some example you should solve it easily. below is some example you should solve it.
+Most of the React source code is about traversing a Tree, make sure you are familiar with DFS algorithms (especially preorder-traversal) and you can solve some simple problems, here are some examples that should be easy for you to solve. Below are some examples of what you should address.
 
 - https://leetcode.com/problems/same-tree/
 - https://leetcode.com/problems/maximum-depth-of-binary-tree/
