@@ -2,8 +2,8 @@
   "name": "yat-another-react",
   "version": "1.0.0",
   "repository": {
-     "type": "git",
-     "url": "https://github.com/Solo-steven/yat-another-react"
+    "type": "git",
+    "url": "https://github.com/Solo-steven/yat-another-react"
   },
   "keywords": [
     "react",
@@ -13,24 +13,26 @@
     "tutorial",
     "implement"
   ],
-  "private":"true",
+  "private": "true",
   "workspaces": [
-    "demo/*"
+    "packages/*"
   ],
   "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
     "demo:lec-1": "yarn workspace virtual-dom start",
     "demo:lec-2": "yarn workspace stack-reconciler start",
     "demo:lec-3": "yarn workspace task-sceduler start"
   },
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.18.9",
-    "@babel/preset-env": "^7.18.9",
-    "@babel/preset-typescript": "^7.18.6",
-    "babel-loader": "^8.2.5",
-    "html-webpack-plugin": "^5.5.0",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "@types/jest": "^29.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.23.1",
+    "jest": "^29.0.3",
+    "jest-environment-jsdom": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.3"
   }
 }
